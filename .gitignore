@@ -1,0 +1,24 @@
+# Node modules (if applicable)
+node_modules/
+
+# Environment variables
+.env
+
+# AWS SAM / CDK / CloudFormation temp files
+.aws-sam/
+cdk.out/
+*.template.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS metadata
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# Build artifacts
+dist/
+build/
