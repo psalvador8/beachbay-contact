@@ -36,7 +36,7 @@ Access Medum article [here](https://medium.com/@psalvador8/building-a-serverless
    Stores guest messages with metadata (language, sentiment, timestamp).
 
 5. **Amazon SES**  
-   Sends an email containing the original and translated message to the hotel.
+   Sends confirmation email to guest and an email containing the original and translated message to the hotel.
 
 ---
 
