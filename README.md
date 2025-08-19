@@ -3,6 +3,7 @@
 A cloud-based contact form solution for hotels, built using **AWS Lambda**, **Amazon Comprehend**, **Amazon Translate**, **Amazon SES**, and **DynamoDB**.  
 This system allows hotel guests to send messages in any language, automatically detects the language, translates the message into English, analyzes sentiment, stores the message in DynamoDB, and sends an email notification to the hotel.
 
+Access Medum article [here](https://medium.com/@psalvador8/building-a-serverless-ai-contact-form-with-aws-and-terraform-enhancing-guest-communication-at-aeae50b4d354)
 ---
 
 ## Features
