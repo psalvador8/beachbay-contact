@@ -32,7 +32,7 @@ The architecture demonstrates how modern cloud services can be combined to build
 
 # 🧭 Architecture
 
-![Architecture Diagram](docs/architecture.png)
+![Architecture Diagram](docs/architecture.jpeg)
 
 ### Request Flow
 
