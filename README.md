@@ -1,10 +1,14 @@
 # 🏨 Serverless AI Contact Form for Hospitality (AWS + Terraform)
 
-This project implements a **serverless AI-powered contact form system** designed for hospitality businesses such as hotels and resorts.
+Serverless, AI-powered contact form system designed to automate and enhance guest communication for hospitality applications.
 
-The system automatically processes guest inquiries using **AWS serverless services and AI capabilities** to detect language, translate messages, analyze sentiment, store inquiries, and notify staff.
+This project processes and enriches incoming messages using AWS serverless services and AI capabilities, enabling multilingual support, sentiment analysis, and automated notifications.
+
+Designed to simulate how modern hospitality platforms can handle high volumes of guest inquiries in a scalable and automated way.
 
 Infrastructure is deployed using **Terraform**, enabling reproducible cloud environments and automated infrastructure provisioning.
+
+Designed and implemented as a serverless, event-driven system to model real-world cloud-native application architectures.
 
 📖 **Architecture Deep Dive (Medium Article):**  
 [Building a Serverless AI Contact Form with AWS and Terraform](https://medium.com/@psalvador8/building-a-serverless-ai-contact-form-with-aws-and-terraform-enhancing-guest-communication-at-aeae50b4d354)
@@ -27,6 +31,15 @@ Key capabilities include:
 - Infrastructure provisioning using Terraform
 
 The architecture demonstrates how modern cloud services can be combined to build **intelligent, event-driven applications**.
+
+---
+
+## 📈 Impact
+
+- Eliminates manual processing of guest inquiries
+- Enables multilingual communication for international users
+- Prioritizes urgent messages using sentiment analysis
+- Demonstrates production-style serverless architecture patterns on AWS
 
 ---
 
@@ -136,11 +149,18 @@ Key reliability features include:
 
 Because the system is serverless, it can automatically handle spikes in guest inquiries without additional infrastructure management.
 
+## 🔁 Operational Considerations
+
+- CloudWatch logs enable monitoring and debugging of Lambda execution
+- Serverless architecture reduces operational overhead and infrastructure management
+- Event-driven processing ensures efficient handling of incoming requests
+- AWS managed services provide built-in fault tolerance and high availability
+
 ---
 
 # 🧠 Design Decisions
 
-Several architectural choices were made to optimize scalability and maintainability.
+This system was designed to reflect real-world serverless architectures, focusing on scalability, automation, and intelligent message processing.
 
 - **Serverless architecture** eliminates the need for infrastructure management.
 - **API Gateway** provides a secure and scalable entry point for requests.
