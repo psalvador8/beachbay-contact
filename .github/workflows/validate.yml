@@ -14,13 +14,13 @@ jobs:
           node-version: '20'
           cache: npm
           cache-dependency-path: lambda/package-lock.json
+      - name: Package Lambda and check JavaScript syntax
+        run: |
+          ./package_lambda.sh
+          node --check lambda/index.js
       - name: Normalize Terraform formatting for validation
         run: terraform fmt -recursive infrastructure
       - name: Initialize Terraform without remote backend
         run: terraform -chdir=infrastructure init -backend=false -input=false
       - name: Validate Terraform configuration
         run: terraform -chdir=infrastructure validate
-      - name: Package Lambda and check JavaScript syntax
-        run: |
-          ./package_lambda.sh
-          node --check lambda/index.js
