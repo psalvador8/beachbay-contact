@@ -4,7 +4,7 @@
 resource "aws_lambda_function" "contact_handler" {
   function_name = var.lambda_function_name
 
-  # Use path.module to resolve relative path from lambda.tf location
+  # Run ./package_lambda.sh from the repository root before terraform plan/apply.
   filename         = "${path.module}/../lambda/package.zip"
   source_code_hash = filebase64sha256("${path.module}/../lambda/package.zip")
 
