@@ -1,6 +1,6 @@
 // lambda/index.js
 const AWS = require("aws-sdk");
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.REGION });
 const comprehend = new AWS.Comprehend({ region: process.env.REGION });
@@ -11,8 +11,7 @@ const TABLE = process.env.DYNAMO_TABLE;
 const SENDER = process.env.SENDER_EMAIL;
 
 exports.handler = async (event) => {
-  console.log("Full event:", JSON.stringify(event, null, 2));
-  console.log("Event body:", event.body);
+  // Do not log request bodies containing guest personal information.
 
   try {
     const body = JSON.parse(event.body);
@@ -58,7 +57,7 @@ exports.handler = async (event) => {
     const dbParams = {
       TableName: TABLE,
       Item: {
-        id: uuidv4(),          // unique ID
+        id: randomUUID(),          // unique ID
         name,
         email,
         originalMessage: message,
@@ -89,7 +88,7 @@ const emailParamsToSender = {
 // Email to hotel (notification)
 const emailParamsToReceiver = {
   Source: SENDER,
-  Destination: { ToAddresses: [SENDER] },  
+  Destination: { ToAddresses: [process.env.NOTIFY_EMAIL] },  
   Message: {
     Subject: { Data: `New message from ${name}` },
     Body: {
@@ -112,7 +111,7 @@ const emailParamsToReceiver = {
     };
 
   } catch (err) {
-    console.error("Error processing message:", err);
+    console.error("Error processing message:", err?.name || "UnknownError");
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" })

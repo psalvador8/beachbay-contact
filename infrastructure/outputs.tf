@@ -1,10 +1,10 @@
 output "website_endpoint" {
-  description = "Public URL of the static website"
-  value       = aws_s3_bucket_website_configuration.website_config.website_endpoint
+  description = "HTTPS URL of the CloudFront distribution serving the private S3 website"
+  value       = "https://${aws_cloudfront_distribution.website.domain_name}"
 }
 
 output "bucket_name" {
-  description = "Name of the S3 bucket"
+  description = "Name of the private S3 bucket"
   value       = aws_s3_bucket.website.bucket
 }
 

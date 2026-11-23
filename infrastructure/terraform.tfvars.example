@@ -1,0 +1,6 @@
+aws_region           = "us-east-1"
+website_bucket_name  = "replace-with-globally-unique-bucket-name"
+lambda_function_name = "beachbay-contact-handler"
+dynamodb_table_name  = "beachbay_inquiries"
+ses_sender_email     = "verified-sender@example.com"
+ses_notify_email     = "team@example.com"

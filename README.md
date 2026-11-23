@@ -1,4 +1,4 @@
-# 🏨 Serverless AI Contact Form for Hospitality (AWS + Terraform)
+> **Deployment note (portfolio review):** The Terraform configuration now serves the frontend from a **private S3 bucket through CloudFront Origin Access Control (OAC)**, not a public S3 website endpoint. From the repository root, run `./package_lambda.sh` to build `lambda/package.zip` before `terraform plan` or `terraform apply`. Copy `infrastructure/terraform.tfvars.example` to `infrastructure/terraform.tfvars` and set your own verified SES sender and notification addresses. The Terraform S3 backend bucket must exist before initialization. After deployment, upload frontend files to the private S3 bucket, update the frontend API endpoint to the deployed `http_api_endpoint`, and use `website_endpoint` for the CloudFront HTTPS URL. This repository has not been deployment-tested as part of the review.\n\n# 🏨 Serverless AI Contact Form for Hospitality (AWS + Terraform)
 
 Serverless, AI-powered contact form system designed to automate and enhance guest communication for hospitality applications.
 

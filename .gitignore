@@ -22,3 +22,15 @@ npm-debug.log*
 # Build artifacts
 dist/
 build/
+
+# Terraform local state, plans, and environment-specific variables
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+**/plan.out
+**/terraform.tfvars
+**/terraform.tfvars.json
+
+# Generated deployment artifacts
+**/package.zip
