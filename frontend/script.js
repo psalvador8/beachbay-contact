@@ -1,3 +1,6 @@
+// Replace the endpoint below after deploying Terraform (see infrastructure output http_api_endpoint).
+const CONTACT_API_URL = "REPLACE_WITH_API_GATEWAY_ENDPOINT/contact";
+
 document.getElementById("contactForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -9,7 +12,7 @@ document.getElementById("contactForm").addEventListener("submit", async function
   };
 
   try {
-    const response = await fetch("https://szft6i9thi.execute-api.us-east-1.amazonaws.com/contact", {
+    const response = await fetch(CONTACT_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
