@@ -11,8 +11,7 @@ const TABLE = process.env.DYNAMO_TABLE;
 const SENDER = process.env.SENDER_EMAIL;
 
 exports.handler = async (event) => {
-  console.log("Full event:", JSON.stringify(event, null, 2));
-  console.log("Event body:", event.body);
+  // Do not log request bodies containing guest personal information.
 
   try {
     const body = JSON.parse(event.body);
@@ -112,7 +111,7 @@ const emailParamsToReceiver = {
     };
 
   } catch (err) {
-    console.error("Error processing message:", err);
+    console.error("Error processing message:", err?.name || "UnknownError");
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" })
