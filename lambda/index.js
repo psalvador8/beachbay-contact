@@ -79,7 +79,7 @@ const emailParamsToSender = {
     Subject: { Data: `Thank you for contacting BeachBay Hotel!` },
     Body: {
       Text: {
-        Data: `Hi ${name},\n\nThanks for reaching out!\n\nWe received your message:\n\n"${message}"\n\nA memeber of our team will get back to you shortly.\n\nBest regards,\n\nBeachBay Guest Services`,
+        Data: `Hi ${name},\n\nThanks for reaching out!\n\nWe received your message:\n\n"${message}"\n\nA member of our team will get back to you shortly.\n\nBest regards,\n\nBeachBay Guest Services`,
       },
     },
   },
