@@ -28,7 +28,7 @@ document.getElementById("contactForm").addEventListener("submit", async function
       statusEl.style.color = "green";
       form.reset();
     } else {
-      statusEl.textContent = "Error: " + (result.message || "Something went wrong.");
+      statusEl.textContent = "Error: " + (result.error || result.message || "Something went wrong.");
       statusEl.style.color = "red";
     }
   } catch (error) {
