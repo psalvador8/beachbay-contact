@@ -1,258 +1,165 @@
-> **Deployment note (portfolio review):** The Terraform configuration now serves the frontend from a **private S3 bucket through CloudFront Origin Access Control (OAC)**, not a public S3 website endpoint. From the repository root, run `./package_lambda.sh` to build `lambda/package.zip` before `terraform plan` or `terraform apply`. Copy `infrastructure/terraform.tfvars.example` to `infrastructure/terraform.tfvars` and set your own verified SES sender and notification addresses. The Terraform S3 backend bucket must exist before initialization. After deployment, upload frontend files to the private S3 bucket, update the frontend API endpoint to the deployed `http_api_endpoint`, and use `website_endpoint` for the CloudFront HTTPS URL. This repository has not been deployment-tested as part of the review.\n\n# 🏨 Serverless AI Contact Form for Hospitality (AWS + Terraform)
+# Serverless AI Contact Form for Hospitality (AWS + Terraform)
 
-Serverless, AI-powered contact form system designed to automate and enhance guest communication for hospitality applications.
+An AWS serverless contact form that processes hospitality guest inquiries, detects language and sentiment, translates messages, stores submissions, and sends email notifications. Terraform defines the supporting infrastructure.
 
-This project processes and enriches incoming messages using AWS serverless services and AI capabilities, enabling multilingual support, sentiment analysis, and automated notifications.
+**Focus:** AWS infrastructure as code, serverless integration, IAM, and secure static-site delivery.
 
-Designed to simulate how modern hospitality platforms can handle high volumes of guest inquiries in a scalable and automated way.
+[Architecture deep dive (Medium)](https://medium.com/@psalvador8/building-a-serverless-ai-contact-form-with-aws-and-terraform-enhancing-guest-communication-at-aeae50b4d354)
 
-Infrastructure is deployed using **Terraform**, enabling reproducible cloud environments and automated infrastructure provisioning.
+## Business problem and solution
 
-Designed and implemented as a serverless, event-driven system to model real-world cloud-native application architectures.
+Hospitality teams may receive inquiries in multiple languages and need a consistent way to capture and route messages. This project models a guest inquiry workflow using managed AWS services rather than manually processing every submission.
 
-📖 **Architecture Deep Dive (Medium Article):**  
-[Building a Serverless AI Contact Form with AWS and Terraform](https://medium.com/@psalvador8/building-a-serverless-ai-contact-form-with-aws-and-terraform-enhancing-guest-communication-at-aeae50b4d354)
+The application is a portfolio implementation, not a claim of production use or measured business outcomes.
 
----
+## Architecture
 
-# 📌 Project Overview
+![Project architecture diagram](docs/architecture.jpeg)
 
-Traditional contact forms can create communication barriers for international guests and often lack mechanisms to prioritize urgent inquiries.
+**Frontend:** Static HTML, CSS, and JavaScript in a **private S3 bucket**, delivered through **CloudFront with Origin Access Control (OAC)**. S3 Block Public Access is enabled; the bucket is not a public S3 website endpoint.
 
-This project implements a **serverless cloud architecture** that enhances guest communication by automatically processing incoming messages.
+**Request path:**
 
-Key capabilities include:
-
-- Automatic language detection
-- Translation of guest messages into English
-- Sentiment analysis to prioritize urgent requests
-- Message storage for historical records
-- Automated email notifications to hotel staff
-- Infrastructure provisioning using Terraform
-
-The architecture demonstrates how modern cloud services can be combined to build **intelligent, event-driven applications**.
-
----
-
-## 📈 Impact
-
-- Eliminates manual processing of guest inquiries
-- Enables multilingual communication for international users
-- Prioritizes urgent messages using sentiment analysis
-- Demonstrates production-style serverless architecture patterns on AWS
-
----
-
-# 🧭 Architecture
-
-![Architecture Diagram](docs/architecture.jpeg)
-
-### Request Flow
-
-```
-Guest Contact Form
-        ↓
-API Gateway
-        ↓
-AWS Lambda Function
-        ↓
-Amazon Comprehend (Language Detection + Sentiment)
-        ↓
-Amazon Translate (Message Translation)
-        ↓
-DynamoDB (Message Storage)
-        ↓
-Amazon SES (Email Notification)
+```text
+Guest browser -> CloudFront -> private S3 (frontend)
+Guest browser -> API Gateway HTTP API (POST /contact)
+              -> Lambda (Node.js)
+                 -> Comprehend (language and sentiment)
+                 -> Translate (non-English messages)
+                 -> DynamoDB (inquiry record)
+                 -> SES (staff email notification)
 ```
 
-Guest messages are submitted through a web contact form.
+Terraform provisions the S3 bucket, CloudFront distribution and OAC, HTTP API, Lambda function and permissions, DynamoDB table, IAM configuration, and related resources. The browser calls API Gateway directly; CloudFront serves the static frontend.
 
-The request is sent to **Amazon API Gateway**, which triggers an **AWS Lambda function**.
+## Technologies
 
-The Lambda function performs several processing steps:
+- **Infrastructure:** Terraform, Amazon S3, Amazon CloudFront, OAC, IAM
+- **Backend:** Amazon API Gateway (HTTP API), AWS Lambda (Node.js), Amazon DynamoDB, Amazon SES
+- **Language processing:** Amazon Comprehend and Amazon Translate
+- **Frontend:** HTML, CSS, JavaScript
 
-- Detects the language of the message
-- Analyzes sentiment using Amazon Comprehend
-- Translates non-English messages using Amazon Translate
-- Stores the message and metadata in DynamoDB
-- Sends email notifications using Amazon SES
+## Key engineering decisions
 
-This architecture allows hotels to automatically process guest inquiries in a **scalable and multilingual system**.
+- **Private S3 origin:** CloudFront OAC grants the distribution read access without making the bucket public.
+- **Infrastructure as code:** Terraform keeps resource configuration reviewable and reproducible.
+- **Managed serverless services:** API Gateway, Lambda, and DynamoDB reduce server administration.
+- **Scoped AWS access:** IAM roles and policies govern Lambda access to dependent services.
+- **Separated frontend and backend:** Static assets are delivered by CloudFront; form submissions use an HTTP API.
 
----
+These are architectural choices represented in the repository, not proof that the latest configuration has passed a full deployment test.
 
-# 🧰 Technologies Used
+## Deploying the project
 
-- AWS Lambda
-- Amazon API Gateway
-- Amazon Comprehend
-- Amazon Translate
-- Amazon SES
-- Amazon DynamoDB
-- Terraform
-- Python / Node.js
-- AWS CloudWatch
-- HTML / CSS / JavaScript
-
----
-
-# ⚙️ Deployment Strategy
-
-Infrastructure for this project is provisioned using **Terraform**, enabling automated and repeatable deployments.
-
-Terraform provisions:
-
-- API Gateway endpoint
-- Lambda function
-- DynamoDB table
-- IAM roles and permissions
-- SES configuration
-- CloudWatch logging
-
-The serverless backend processes incoming messages, while the frontend contact form sends requests to the API endpoint.
-
-This Infrastructure-as-Code approach ensures the architecture can be **recreated consistently across environments**.
-
----
-
-# 🚀 Quick Deployment
+> **Status:** The current Terraform configuration has not been independently end-to-end deployment-tested as part of the latest repository review. Review configuration, account permissions, costs, and AWS service availability before deployment.
 
 ### Prerequisites
 
-- AWS account
-- Terraform installed
-- AWS CLI configured
+- AWS account and configured AWS CLI credentials with appropriate permissions
+- Terraform and Node.js/npm installed; `zip` available
+- A globally unique S3 bucket name for the frontend
+- An existing **Terraform state S3 bucket**: `infrastructure/backend.tf` currently specifies `beachbay-tf-state-miami` in `us-east-1`. **Change that backend bucket to one you own and create it before `terraform init`.** Protect state and configure locking appropriately.
+- SES sender and notification addresses appropriate to your AWS account and SES verification/sandbox status
 
-### Deploy Infrastructure
+### 1. Package Lambda dependencies
 
+From the repository root:
+
+```bash
+./package_lambda.sh
 ```
+
+This runs `npm ci` and builds `lambda/package.zip`, which Terraform expects to exist before planning.
+
+### 2. Configure Terraform variables
+
+```bash
+cd infrastructure
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` with your own globally unique `website_bucket_name`, verified `ses_sender_email`, and `ses_notify_email`. Review the region and resource names. Do not commit personal values, credentials, state files, or secrets.
+
+### 3. Initialize and review
+
+After configuring the backend S3 bucket:
+
+```bash
 terraform init
+terraform fmt -check
+terraform validate
+terraform plan
+```
+
+Inspect the plan, expected permissions, resource costs, and names before applying.
+
+### 4. Provision resources
+
+```bash
 terraform apply
+terraform output
 ```
 
-Terraform provisions the required AWS services and deploys the serverless backend infrastructure.
+Relevant outputs include `bucket_name`, `website_endpoint` (CloudFront HTTPS URL), and `http_api_endpoint` (API Gateway base URL).
 
-After deployment, the **API Gateway endpoint** can be integrated with the frontend contact form.
+### 5. Configure and upload the frontend
 
----
+Replace `REPLACE_WITH_API_GATEWAY_ENDPOINT` in `frontend/script.js` with the `http_api_endpoint` output, preserving the existing `/contact` suffix.
 
-# 🛟 Reliability & Scalability
+Upload the files in `frontend/` to the **private** S3 bucket shown by `bucket_name` (for example, using `aws s3 sync ../frontend/ s3://YOUR_BUCKET_NAME/` while in `infrastructure/`). Access the site through `website_endpoint`, **not** an S3 website URL.
 
-The system is designed using **serverless AWS services**, which provide automatic scaling and high availability.
+If updating an existing CloudFront deployment, allow for cache propagation or invalidate cached assets as needed.
 
-Key reliability features include:
+### 6. Verify behavior
 
-- Automatic scaling with AWS Lambda
-- Managed AWS services with built-in redundancy
-- CloudWatch logging for monitoring
-- Event-driven processing architecture
+Recommended manual checks after deployment:
 
-Because the system is serverless, it can automatically handle spikes in guest inquiries without additional infrastructure management.
+1. Load the frontend over HTTPS using the CloudFront URL.
+2. Submit an inquiry and inspect the browser response.
+3. Confirm a DynamoDB record is created and an SES notification is delivered.
+4. Submit a non-English message and inspect translation/language handling.
+5. Review Lambda logs and confirm the S3 bucket is not publicly accessible.
 
-## 🔁 Operational Considerations
+**These are suggested validation steps, not a claim that the current version passed them.**
 
-- CloudWatch logs enable monitoring and debugging of Lambda execution
-- Serverless architecture reduces operational overhead and infrastructure management
-- Event-driven processing ensures efficient handling of incoming requests
-- AWS managed services provide built-in fault tolerance and high availability
+### Cleanup
 
----
+When finished, empty the website bucket if necessary and review the Terraform destroy plan before running `terraform destroy`. The separately created Terraform backend bucket and its state require separate lifecycle management. Check for any residual billable resources.
 
-# 🧠 Design Decisions
+## Repository structure
 
-This system was designed to reflect real-world serverless architectures, focusing on scalability, automation, and intelligent message processing.
-
-- **Serverless architecture** eliminates the need for infrastructure management.
-- **API Gateway** provides a secure and scalable entry point for requests.
-- **AWS Lambda** enables event-driven processing without servers.
-- **Amazon Comprehend** enables automated sentiment analysis for prioritizing guest concerns.
-- **Amazon Translate** enables communication with international guests.
-- **DynamoDB** provides scalable, low-latency storage for guest messages.
-- **Terraform** ensures infrastructure is reproducible and version-controlled.
-
-These decisions enable an intelligent, scalable guest communication system.
-
----
-
-# 🏗️ System Design Principles
-
-This architecture follows several cloud-native design principles.
-
-### Event-Driven Architecture
-
-Incoming messages trigger processing workflows automatically through AWS Lambda.
-
-### Scalability
-
-Serverless services scale automatically based on demand.
-
-### Loose Coupling
-
-Each AWS service performs a specific role and communicates through defined interfaces.
-
-### Fault Isolation
-
-Failures in one component do not cascade through the entire system.
-
-### Automation
-
-Infrastructure is managed using Terraform to eliminate manual configuration.
-
----
-
-# 🎯 What This Project Demonstrates
-
-- Serverless application architecture on AWS
-- Integration of AI services into cloud applications
-- Infrastructure as Code with Terraform
-- Event-driven system design
-- Automated message processing workflows
-- Cloud-native scalability and reliability
-
----
-
-# 🚀 Potential Improvements
-
-Future enhancements could include:
-
-- Adding authentication for hotel staff dashboards
-- Implementing analytics dashboards for inquiry trends
-- Adding automated AI-generated responses
-- Implementing rate limiting and security protections
-- Adding monitoring dashboards with CloudWatch metrics
-
----
-
-# 📁 Repository Structure
-
-```
+```text
+.
 ├── README.md
-├── terraform/
+├── package_lambda.sh
+├── infrastructure/
+│   ├── api.tf
+│   ├── backend.tf
+│   ├── iam.tf
+│   ├── lambda.tf
 │   ├── main.tf
-│   ├── variables.tf
 │   ├── outputs.tf
+│   ├── variables.tf
+│   └── terraform.tfvars.example
 ├── lambda/
 │   ├── index.js
-│   └── dependencies
+│   ├── package.json
+│   └── package-lock.json
 ├── frontend/
 │   ├── index.html
 │   ├── script.js
 │   └── styles.css
 └── docs/
-    └── architecture.png
+    └── architecture.jpeg
 ```
 
----
+## Limitations and next steps
 
-# 💡 Key Takeaway
+- The API's current CORS configuration allows all origins; production use would call for tighter origin restrictions and abuse protections.
+- SES delivery depends on account verification and sandbox status.
+- The deployment procedure requires manual packaging, frontend API URL configuration, and S3 upload.
+- Add automated deployment validation, monitoring/alerting, and documented end-to-end test results before describing this as production-ready.
 
-This project demonstrates how **serverless cloud services and AI capabilities can be combined to build intelligent applications**.
+## Author
 
-By integrating AWS Lambda, AI services, DynamoDB, and Terraform infrastructure automation, the system provides a scalable solution for improving guest communication in hospitality environments.
-
----
-
-# 👤 Author
-
-**Priscilla Salvador**  
-Cloud & DevOps Engineer
+Priscilla Salvador — AWS Cloud Infrastructure & Terraform
